@@ -1,0 +1,210 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button-enhanced";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Stethoscope } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+const DoctorRegistration = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    name: "",
+    specialization: "",
+    experience: "",
+    availability: "",
+    consultationFee: "",
+    visitFee: "",
+    about: ""
+  });
+
+  const specializations = [
+    "General Physician",
+    "Cardiologist", 
+    "Dermatologist",
+    "Pediatrician",
+    "Orthopedic",
+    "Neurologist",
+    "Gynecologist",
+    "Psychiatrist",
+    "General Nurse",
+    "ICU Specialist"
+  ];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Store doctor data in localStorage for demo
+    const doctorData = {
+      id: Date.now().toString(),
+      ...formData,
+      profileImage: "/src/assets/doctor-male-1.jpg",
+      rating: (4.0 + Math.random() * 1).toFixed(1),
+      patients: Math.floor(Math.random() * 500) + 100
+    };
+    
+    const existingDoctors = JSON.parse(localStorage.getItem("doctors") || "[]");
+    localStorage.setItem("doctors", JSON.stringify([...existingDoctors, doctorData]));
+    
+    toast({
+      title: "Registration Successful!",
+      description: "Welcome to HealthConnect. Your profile is now active.",
+    });
+    
+    navigate("/doctor/dashboard");
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center mb-6">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate("/")}
+            className="mr-3"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center">
+            <Stethoscope className="h-6 w-6 text-primary mr-2" />
+            <h1 className="text-2xl font-bold text-foreground">Doctor Registration</h1>
+          </div>
+        </div>
+
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle>Professional Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Full Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    placeholder="Dr. John Smith"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="specialization">Specialization *</Label>
+                  <Select 
+                    value={formData.specialization} 
+                    onValueChange={(value) => handleInputChange("specialization", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your specialization" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specializations.map((spec) => (
+                        <SelectItem key={spec} value={spec}>
+                          {spec}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="experience">Years of Experience *</Label>
+                  <Select 
+                    value={formData.experience} 
+                    onValueChange={(value) => handleInputChange("experience", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select experience" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1-2 years">1-2 years</SelectItem>
+                      <SelectItem value="3-5 years">3-5 years</SelectItem>
+                      <SelectItem value="6-10 years">6-10 years</SelectItem>
+                      <SelectItem value="10+ years">10+ years</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="availability">Availability *</Label>
+                  <Select 
+                    value={formData.availability} 
+                    onValueChange={(value) => handleInputChange("availability", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select availability" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="9 AM - 5 PM">9 AM - 5 PM</SelectItem>
+                      <SelectItem value="10 AM - 6 PM">10 AM - 6 PM</SelectItem>
+                      <SelectItem value="2 PM - 10 PM">2 PM - 10 PM</SelectItem>
+                      <SelectItem value="24/7 Emergency">24/7 Emergency</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="consultationFee">Online Consultation Fee (₹) *</Label>
+                    <Input
+                      id="consultationFee"
+                      type="number"
+                      value={formData.consultationFee}
+                      onChange={(e) => handleInputChange("consultationFee", e.target.value)}
+                      placeholder="500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="visitFee">Home Visit Fee (₹) *</Label>
+                    <Input
+                      id="visitFee"
+                      type="number"
+                      value={formData.visitFee}
+                      onChange={(e) => handleInputChange("visitFee", e.target.value)}
+                      placeholder="1000"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="about">About You</Label>
+                  <Textarea
+                    id="about"
+                    value={formData.about}
+                    onChange={(e) => handleInputChange("about", e.target.value)}
+                    placeholder="Tell patients about your expertise and approach to healthcare..."
+                    rows={4}
+                  />
+                </div>
+              </div>
+
+              <Button 
+                type="submit" 
+                variant="medical" 
+                size="lg" 
+                className="w-full"
+              >
+                Complete Registration
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default DoctorRegistration;
