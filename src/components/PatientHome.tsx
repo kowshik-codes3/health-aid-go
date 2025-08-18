@@ -14,7 +14,9 @@ import {
   Home, 
   Filter,
   MapPin,
-  Clock
+  Clock,
+  LogOut,
+  Settings
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import doctorMale1 from "@/assets/doctor-male-1.jpg";
@@ -100,10 +102,11 @@ const PatientHome = () => {
   );
 
   const handleConsultation = (doctor: Doctor, type: 'online' | 'visit') => {
-    toast({
-      title: `${type === 'online' ? 'Online Consultation' : 'Home Visit'} Request`,
-      description: `Request sent to ${doctor.name}. You'll receive confirmation shortly.`,
-    });
+    if (type === 'online') {
+      navigate(`/patient/chat/${doctor.id}`);
+    } else {
+      navigate(`/patient/visit-booking/${doctor.id}`);
+    }
   };
 
   return (
@@ -118,11 +121,32 @@ const PatientHome = () => {
               {patient?.address || 'Location not set'}
             </p>
           </div>
-          <Avatar>
-            <AvatarFallback className="bg-white text-primary">
-              {patient?.name?.charAt(0) || 'P'}
-            </AvatarFallback>
-          </Avatar>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate("/patient/profile")}
+              className="text-white hover:bg-white/20"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => {
+                localStorage.removeItem("currentPatient");
+                navigate("/");
+              }}
+              className="text-white hover:bg-white/20"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+            <Avatar>
+              <AvatarFallback className="bg-white text-primary">
+                {patient?.name?.charAt(0) || 'P'}
+              </AvatarFallback>
+            </Avatar>
+          </div>
         </div>
         
         {/* Search Bar */}

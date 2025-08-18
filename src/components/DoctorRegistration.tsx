@@ -19,7 +19,9 @@ const DoctorRegistration = () => {
     availability: "",
     consultationFee: "",
     visitFee: "",
-    about: ""
+    about: "",
+    address: "",
+    mbbsCertificate: ""
   });
 
   const specializations = [
@@ -177,6 +179,37 @@ const DoctorRegistration = () => {
                       required
                     />
                   </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="address">Clinic/Hospital Address *</Label>
+                  <Textarea
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    placeholder="Complete address for verification and patient visits..."
+                    rows={3}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="mbbsCertificate">MBBS Certificate *</Label>
+                  <Input
+                    id="mbbsCertificate"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleInputChange("mbbsCertificate", file.name);
+                      }
+                    }}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Upload your MBBS certificate for verification
+                  </p>
                 </div>
 
                 <div>

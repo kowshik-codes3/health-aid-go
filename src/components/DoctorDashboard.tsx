@@ -12,7 +12,8 @@ import {
   Clock,
   IndianRupee,
   Edit,
-  LogOut
+  LogOut,
+  ArrowLeft
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -107,14 +108,24 @@ const DoctorDashboard = () => {
               </div>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={handleLogout}
-            className="text-white hover:bg-white/20"
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <div className="flex space-x-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate("/")}
+              className="text-white hover:bg-white/20"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={handleLogout}
+              className="text-white hover:bg-white/20"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -187,7 +198,11 @@ const DoctorDashboard = () => {
             </div>
             
             <div className="flex space-x-2">
-              <Button variant="medical-outline" className="flex-1">
+              <Button 
+                variant="medical-outline" 
+                className="flex-1"
+                onClick={() => navigate("/doctor/profile")}
+              >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Profile
               </Button>
