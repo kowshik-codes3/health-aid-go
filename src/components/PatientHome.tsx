@@ -16,9 +16,11 @@ import {
   MapPin,
   Clock,
   LogOut,
-  Settings
+  Settings,
+  MessageCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import doctorMale1 from "@/assets/doctor-male-1.jpg";
 import doctorFemale1 from "@/assets/doctor-female-1.jpg";
 import nurseFemale1 from "@/assets/nurse-female-1.jpg";
@@ -34,6 +36,7 @@ interface Doctor {
   visitFee: string;
   availability: string;
   profileImage: string;
+  isOnline?: boolean;
 }
 
 const PatientHome = () => {
@@ -65,7 +68,8 @@ const PatientHome = () => {
         consultationFee: "600",
         visitFee: "1200",
         availability: "9 AM - 6 PM",
-        profileImage: doctorFemale1
+        profileImage: doctorFemale1,
+        isOnline: true
       },
       {
         id: "2", 
@@ -77,7 +81,8 @@ const PatientHome = () => {
         consultationFee: "800",
         visitFee: "1500",
         availability: "10 AM - 5 PM",
-        profileImage: doctorMale1
+        profileImage: doctorMale1,
+        isOnline: false
       },
       {
         id: "3",
@@ -89,7 +94,8 @@ const PatientHome = () => {
         consultationFee: "300",
         visitFee: "600",
         availability: "24/7 Emergency",
-        profileImage: nurseFemale1
+        profileImage: nurseFemale1,
+        isOnline: true
       }
     ];
     
@@ -101,8 +107,10 @@ const PatientHome = () => {
     doctor.specialization.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleConsultation = (doctor: Doctor, type: 'online' | 'visit') => {
+  const handleConsultation = (doctor: Doctor, type: 'online' | 'visit' | 'chat') => {
     if (type === 'online') {
+      navigate(`/patient/chat/${doctor.id}`);
+    } else if (type === 'chat') {
       navigate(`/patient/chat/${doctor.id}`);
     } else {
       navigate(`/patient/visit-booking/${doctor.id}`);
@@ -122,6 +130,7 @@ const PatientHome = () => {
             </p>
           </div>
           <div className="flex items-center space-x-2">
+            <ThemeToggle />
             <Button 
               variant="ghost" 
               size="icon"
@@ -156,7 +165,7 @@ const PatientHome = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search doctors, specializations..."
-            className="pl-10 bg-white"
+            className="pl-10 bg-white text-black placeholder:text-muted-foreground"
           />
         </div>
       </div>
@@ -175,10 +184,17 @@ const PatientHome = () => {
             <Card key={doctor.id} className="shadow-card hover:shadow-medical transition-shadow">
               <CardContent className="p-4">
                 <div className="flex space-x-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={doctor.profileImage} alt={doctor.name} />
-                    <AvatarFallback>{doctor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={doctor.profileImage} alt={doctor.name} />
+                      <AvatarFallback>{doctor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <div 
+                      className={`absolute -top-1 -right-1 h-4 w-4 rounded-full border-2 border-white ${
+                        doctor.isOnline ? 'bg-green-500' : 'bg-red-500'
+                      }`}
+                    />
+                  </div>
                   
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
@@ -214,17 +230,26 @@ const PatientHome = () => {
                         <Button 
                           size="sm" 
                           variant="medical-outline"
+                          onClick={() => handleConsultation(doctor, 'chat')}
+                          className="text-xs px-2 py-1"
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" />
+                          Chat
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="medical-outline"
                           onClick={() => handleConsultation(doctor, 'online')}
-                          className="text-xs px-3 py-1"
+                          className="text-xs px-2 py-1"
                         >
                           <Video className="h-3 w-3 mr-1" />
-                          Consult
+                          Video
                         </Button>
                         <Button 
                           size="sm" 
                           variant="medical"
                           onClick={() => handleConsultation(doctor, 'visit')}
-                          className="text-xs px-3 py-1"
+                          className="text-xs px-2 py-1"
                         >
                           <Home className="h-3 w-3 mr-1" />
                           Visit
