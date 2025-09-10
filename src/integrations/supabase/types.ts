@@ -14,7 +14,135 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      doctors: {
+        Row: {
+          about_text: string | null
+          address: string
+          availability: string
+          consultation_fee: number
+          created_at: string
+          experience: number
+          id: string
+          is_online: boolean
+          mbbs_certificate_url: string | null
+          name: string
+          specialization: string
+          updated_at: string
+          user_id: string
+          visit_fee: number
+        }
+        Insert: {
+          about_text?: string | null
+          address: string
+          availability: string
+          consultation_fee: number
+          created_at?: string
+          experience: number
+          id?: string
+          is_online?: boolean
+          mbbs_certificate_url?: string | null
+          name: string
+          specialization: string
+          updated_at?: string
+          user_id: string
+          visit_fee: number
+        }
+        Update: {
+          about_text?: string | null
+          address?: string
+          availability?: string
+          consultation_fee?: number
+          created_at?: string
+          experience?: number
+          id?: string
+          is_online?: boolean
+          mbbs_certificate_url?: string | null
+          name?: string
+          specialization?: string
+          updated_at?: string
+          user_id?: string
+          visit_fee?: number
+        }
+        Relationships: []
+      }
+      name: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
+      }
+      patients: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+          user_type: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+          user_type: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
