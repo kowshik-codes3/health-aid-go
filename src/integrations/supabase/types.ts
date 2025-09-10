@@ -65,21 +65,6 @@ export type Database = {
         }
         Relationships: []
       }
-      name: {
-        Row: {
-          created_at: string
-          id: number
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-        }
-        Update: {
-          created_at?: string
-          id?: number
-        }
-        Relationships: []
-      }
       patients: {
         Row: {
           address: string | null

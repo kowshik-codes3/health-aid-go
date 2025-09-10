@@ -16,24 +16,57 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import type { User, Session } from '@supabase/supabase-js';
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [doctor, setDoctor] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get doctor data (in real app, this would come from authentication)
-    const doctors = JSON.parse(localStorage.getItem("doctors") || "[]");
-    if (doctors.length > 0) {
-      setDoctor(doctors[doctors.length - 1]); // Get the latest registered doctor
-    } else {
-      // Redirect to registration if no doctor found
-      navigate("/doctor/register");
-    }
+    // Check authentication and get doctor data
+    const initializeDoctor = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          navigate('/');
+          return;
+        }
+
+        setSession(session);
+        setUser(session.user);
+
+        // Get doctor profile
+        const { data: doctorData, error } = await supabase
+          .from('doctors')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching doctor:', error);
+          navigate("/doctor/register");
+        } else {
+          setDoctor(doctorData);
+        }
+      } catch (error) {
+        console.error('Error initializing doctor:', error);
+        navigate('/');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeDoctor();
   }, [navigate]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",

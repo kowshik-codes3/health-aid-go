@@ -4,20 +4,33 @@ import { Button } from "@/components/ui/button-enhanced";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserCheck, Stethoscope } from "lucide-react";
 import heroImage from "@/assets/healthcare-hero.jpg";
+import { supabase } from "@/integrations/supabase/client";
 
 const RoleSelector = () => {
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
-  const handleRoleSelect = (role: string) => {
+  const handleRoleSelect = async (role: string) => {
     setSelectedRole(role);
-    setTimeout(() => {
-      if (role === "doctor") {
+    
+    if (role === "doctor") {
+      // For doctors, first sign up then register
+      const { data, error } = await supabase.auth.signUp({
+        email: `doctor${Date.now()}@temp.com`,
+        password: 'temp123456',
+        options: {
+          data: {
+            user_type: 'doctor'
+          }
+        }
+      });
+      
+      if (data.user) {
         navigate("/doctor/register");
-      } else {
-        navigate("/patient/auth");
       }
-    }, 300);
+    } else {
+      navigate("/patient/auth");
+    }
   };
 
   return (

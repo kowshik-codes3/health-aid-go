@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button-enhanced";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,10 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Stethoscope } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import type { User, Session } from '@supabase/supabase-js';
 
 const DoctorRegistration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     specialization: "",
@@ -37,27 +42,76 @@ const DoctorRegistration = () => {
     "ICU Specialist"
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/');
+        return;
+      }
+      setSession(session);
+      setUser(session.user);
+    };
+
+    checkAuth();
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Store doctor data in localStorage for demo
-    const doctorData = {
-      id: Date.now().toString(),
-      ...formData,
-      profileImage: "/src/assets/doctor-male-1.jpg",
-      rating: (4.0 + Math.random() * 1).toFixed(1),
-      patients: Math.floor(Math.random() * 500) + 100
-    };
+    if (!user) {
+      toast({
+        title: "Authentication Error",
+        description: "Please sign in first",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    const existingDoctors = JSON.parse(localStorage.getItem("doctors") || "[]");
-    localStorage.setItem("doctors", JSON.stringify([...existingDoctors, doctorData]));
+    setLoading(true);
     
-    toast({
-      title: "Registration Successful!",
-      description: "Welcome to HealthConnect. Your profile is now active.",
-    });
-    
-    navigate("/doctor/dashboard");
+    try {
+      const { error } = await supabase
+        .from('doctors')
+        .insert({
+          user_id: user.id,
+          name: formData.name,
+          specialization: formData.specialization,
+          experience: parseInt(formData.experience.split('-')[0]) || 1,
+          consultation_fee: parseFloat(formData.consultationFee),
+          visit_fee: parseFloat(formData.visitFee),
+          availability: formData.availability,
+          address: formData.address,
+          about_text: formData.about,
+          mbbs_certificate_url: formData.mbbsCertificate,
+          is_online: false
+        });
+
+      if (error) {
+        toast({
+          title: "Registration Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Registration Successful!",
+        description: "Welcome to HealthConnect. Your profile is now active.",
+      });
+      
+      navigate("/doctor/dashboard");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -229,8 +283,9 @@ const DoctorRegistration = () => {
                 variant="medical" 
                 size="lg" 
                 className="w-full"
+                disabled={loading}
               >
-                Complete Registration
+                {loading ? "Registering..." : "Complete Registration"}
               </Button>
             </form>
           </CardContent>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button-enhanced";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,10 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, UserCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import type { User, Session } from '@supabase/supabase-js';
 
 const PatientAuth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
     name: "",
@@ -21,31 +26,66 @@ const PatientAuth = () => {
     confirmPassword: ""
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user && event === 'SIGNED_IN') {
+          navigate('/patient/home');
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        navigate('/patient/home');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     
-    // Simple demo authentication
-    if (loginData.email && loginData.password) {
-      const patientData = {
-        id: Date.now().toString(),
-        name: "John Doe",
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
-        phone: "+91 9876543210",
-        address: "123 Health Street, Medical City"
-      };
-      
-      localStorage.setItem("currentPatient", JSON.stringify(patientData));
-      
-      toast({
-        title: "Login Successful!",
-        description: "Welcome back to HealthConnect.",
+        password: loginData.password,
       });
-      
-      navigate("/patient/home");
+
+      if (error) {
+        toast({
+          title: "Login Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Login Successful!",
+          description: "Welcome back to HealthConnect.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (signupData.password !== signupData.confirmPassword) {
@@ -57,19 +97,61 @@ const PatientAuth = () => {
       return;
     }
     
-    const patientData = {
-      id: Date.now().toString(),
-      ...signupData
-    };
+    setLoading(true);
     
-    localStorage.setItem("currentPatient", JSON.stringify(patientData));
-    
-    toast({
-      title: "Registration Successful!",
-      description: "Welcome to HealthConnect!",
-    });
-    
-    navigate("/patient/home");
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data: authData, error } = await supabase.auth.signUp({
+        email: signupData.email,
+        password: signupData.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            display_name: signupData.name,
+            user_type: 'patient'
+          }
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Signup Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (authData.user) {
+        // Create patient profile
+        const { error: profileError } = await supabase
+          .from('patients')
+          .insert({
+            user_id: authData.user.id,
+            name: signupData.name,
+            phone: signupData.phone,
+            address: signupData.address
+          });
+
+        if (profileError) {
+          console.error('Error creating patient profile:', profileError);
+        }
+
+        toast({
+          title: "Registration Successful!",
+          description: "Welcome to HealthConnect!",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -125,8 +207,8 @@ const PatientAuth = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" variant="medical" className="w-full">
-                    Login
+                  <Button type="submit" variant="medical" className="w-full" disabled={loading}>
+                    {loading ? "Signing In..." : "Login"}
                   </Button>
                 </form>
               </TabsContent>
@@ -194,8 +276,8 @@ const PatientAuth = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" variant="medical" className="w-full">
-                    Sign Up
+                  <Button type="submit" variant="medical" className="w-full" disabled={loading}>
+                    {loading ? "Creating Account..." : "Sign Up"}
                   </Button>
                 </form>
               </TabsContent>
