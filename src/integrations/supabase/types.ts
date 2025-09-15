@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      doctor_specializations: {
+        Row: {
+          condition_type: string
+          created_at: string
+          doctor_id: string
+          id: string
+        }
+        Insert: {
+          condition_type: string
+          created_at?: string
+          doctor_id: string
+          id?: string
+        }
+        Update: {
+          condition_type?: string
+          created_at?: string
+          doctor_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       doctors: {
         Row: {
           about_text: string | null
@@ -64,6 +85,50 @@ export type Database = {
           visit_fee?: number
         }
         Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          notification_type: string
+          recipient_id: string
+          recipient_type: string
+          scan_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          notification_type: string
+          recipient_id: string
+          recipient_type: string
+          scan_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          notification_type?: string
+          recipient_id?: string
+          recipient_type?: string
+          scan_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       patients: {
         Row: {
@@ -125,6 +190,42 @@ export type Database = {
           updated_at?: string
           user_id?: string
           user_type?: string
+        }
+        Relationships: []
+      }
+      scans: {
+        Row: {
+          anomalies_detected: boolean | null
+          created_at: string
+          id: string
+          patient_id: string
+          results: Json
+          risk_level: string | null
+          scan_data: Json
+          scan_type: string
+          updated_at: string
+        }
+        Insert: {
+          anomalies_detected?: boolean | null
+          created_at?: string
+          id?: string
+          patient_id: string
+          results: Json
+          risk_level?: string | null
+          scan_data: Json
+          scan_type: string
+          updated_at?: string
+        }
+        Update: {
+          anomalies_detected?: boolean | null
+          created_at?: string
+          id?: string
+          patient_id?: string
+          results?: Json
+          risk_level?: string | null
+          scan_data?: Json
+          scan_type?: string
+          updated_at?: string
         }
         Relationships: []
       }
