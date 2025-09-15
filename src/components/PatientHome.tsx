@@ -195,7 +195,15 @@ const PatientHome = () => {
         </Card>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <Card className="shadow-card hover:shadow-medical transition-shadow cursor-pointer" onClick={() => navigate('/patient/diagnostics')}>
+            <CardContent className="p-4 text-center">
+              <div className="h-8 w-8 text-primary mx-auto mb-2 bg-primary/10 rounded-full flex items-center justify-center">
+                <Plus className="h-5 w-5" />
+              </div>
+              <p className="text-sm font-medium text-foreground">AI Diagnostics</p>
+            </CardContent>
+          </Card>
           <Card className="shadow-card hover:shadow-medical transition-shadow cursor-pointer">
             <CardContent className="p-4 text-center">
               <Video className="h-8 w-8 text-primary mx-auto mb-2" />

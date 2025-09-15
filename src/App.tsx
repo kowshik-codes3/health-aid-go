@@ -15,6 +15,7 @@ import PatientChat from "./components/PatientChat";
 import VisitBooking from "./components/VisitBooking";
 import PatientProfile from "./components/PatientProfile";
 import DoctorProfile from "./components/DoctorProfile";
+import { DiagnosticHub } from "./components/DiagnosticHub";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/patient/auth" element={<PatientAuth />} />
         <Route path="/patient/home" element={<PatientHome />} />
         <Route path="/patient/profile" element={<PatientProfile />} />
+        <Route path="/patient/diagnostics" element={<DiagnosticHub />} />
         <Route path="/patient/chat/:doctorId" element={<PatientChat />} />
         <Route path="/patient/visit-booking/:doctorId" element={<VisitBooking />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
